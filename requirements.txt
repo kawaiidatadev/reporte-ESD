@@ -1,0 +1,7 @@
+Pillow
+datetime
+openpyxl
+pywin32
+pandas
+pyautogui
+dash
