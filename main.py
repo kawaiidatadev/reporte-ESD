@@ -1,9 +1,11 @@
 from common.__init__ import *
-from db import inciar_db
+from obtener_data import generar_data
+
+
 
 
 if __name__ == '__main__':
-    inciar_db()  # Copia de seguridad de db
+    generar_data()  # Copia de seguridad de db
 
 
 
