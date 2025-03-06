@@ -1,21 +1,3 @@
-"""
-Copia el archivo de:
-\\mercury\Mtto_Prod\00_Departamento_Mantenimiento\ESD\Software\Recurses\data_new_report\ReporteETL\ReporteESD.xlsx
-
-A la carpeta de descargas del usuario de windows actual.nombrendolo como
-Informe ESD (AAAA-MMMM-DD) - (HH-MM-SS)
-LUEGRO LO ABRIRA (SIN MOSTRARLE AL USUARIO)
-para mostrar todas las hojas ocultas, luego parasar por cada una de ellas actualizando todo minimo 3 veces.
-Luego ocultar todas las hojas menos la de "Informe"
-Para luego actualizar todas las tablas dinamiscas que tenga 3 veces cada una.
-luego actualizar 3 veces las consultas.
-Luego actualizar todo lo restante por actualizar.
-y ahora si abrir la carpeta de descargas del usuario señalando el archivo.
-
-en cualquier caso de error, en alguna parte de este proceso, dar un maneje al usuario por medio de msgbx
-
-"""
-
 import shutil
 import os
 import time
@@ -26,10 +8,12 @@ import ctypes
 
 
 def show_error(message):
+    """ Muestra un mensaje de error al usuario. """
     ctypes.windll.user32.MessageBoxW(0, message, "Error", 0)
 
 
 def copy_file(source, destination):
+    """ Copia el archivo fuente al destino. """
     try:
         shutil.copy2(source, destination)
         return True
@@ -57,22 +41,24 @@ def main():
         for sheet in workbook.Sheets:
             sheet.Visible = -1
 
-        # Actualizar consultas y tablas dinámicas
-        excel.ActiveWorkbook.RefreshAll()
-        time.sleep(5)  # Esperar para evitar conflictos
+        # Actualizar consultas y tablas dinámicas mínimo 1 veces
+        for _ in range(1):
+            workbook.RefreshAll()
+            time.sleep(3)  # Esperar para evitar conflictos
 
-        for sheet in workbook.Sheets:
-            try:
-                for pivot_table in sheet.PivotTables():
-                    pivot_table.RefreshTable()
-            except Exception:
-                continue  # Ignorar errores en hojas sin tablas dinámicas
+            for sheet in workbook.Sheets:
+                try:
+                    for pivot_table in sheet.PivotTables():
+                        pivot_table.RefreshTable()
+                except Exception:
+                    continue  # Ignorar errores en hojas sin tablas dinámicas
 
-        # Ocultar todas las hojas excepto "Informe"
+        # Ocultar todas las hojas excepto "Informe" y "Reporte de mediciones semestral"
         for sheet in workbook.Sheets:
-            if sheet.Name != "Informe":
+            if sheet.Name not in ["Informe", "Reporte de mediciones semestral"]:
                 sheet.Visible = 0
 
+        # Guardar y cerrar
         workbook.Save()
         workbook.Close()
         excel.Quit()
@@ -90,5 +76,3 @@ def main():
                 pass
 
 
-if __name__ == "__main__":
-    main()
