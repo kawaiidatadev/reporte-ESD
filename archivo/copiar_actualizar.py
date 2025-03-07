@@ -12,6 +12,11 @@ def show_error(message):
     ctypes.windll.user32.MessageBoxW(0, message, "Error", 0)
 
 
+def kill_excel():
+    """ Cierra todas las instancias de Excel abiertas. """
+    os.system("taskkill /f /im excel.exe")
+
+
 def copy_file(source, destination):
     """ Copia el archivo fuente al destino. """
     try:
@@ -24,6 +29,9 @@ def copy_file(source, destination):
 
 def main():
     try:
+        # Cerrar instancias de Excel antes de iniciar
+        kill_excel()
+
         source_path = r"\\mercury\Mtto_Prod\00_Departamento_Mantenimiento\ESD\Software\Recurses\data_new_report\ReporteETL\ReporteESD.xlsx"
         downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
         dest_filename = f"Informe ESD ({datetime.now().strftime('%Y-%m-%d - %H-%M-%S')}).xlsx"
@@ -41,8 +49,8 @@ def main():
         for sheet in workbook.Sheets:
             sheet.Visible = -1
 
-        # Actualizar consultas y tablas dinámicas mínimo 1 veces
-        for _ in range(1):
+        # Actualizar consultas y tablas dinámicas
+        try:
             workbook.RefreshAll()
             time.sleep(3)  # Esperar para evitar conflictos
 
@@ -50,8 +58,10 @@ def main():
                 try:
                     for pivot_table in sheet.PivotTables():
                         pivot_table.RefreshTable()
-                except Exception:
-                    continue  # Ignorar errores en hojas sin tablas dinámicas
+                except Exception as e:
+                    print(f"Error al actualizar tabla dinámica en hoja '{sheet.Name}': {e}")
+        except Exception as e:
+            print(f"Error al actualizar consultas/tablas dinámicas: {e}")
 
         # Ocultar todas las hojas excepto "Informe" y "Reporte de mediciones semestral"
         for sheet in workbook.Sheets:
@@ -67,6 +77,7 @@ def main():
 
     except Exception:
         show_error(f"Error durante el proceso:\n{traceback.format_exc()}")
+
     finally:
         if 'excel' in locals():
             try:
