@@ -1,9 +1,13 @@
+import time
+
 from common.__init__ import *
 from querys import *
 from db import inciar_db
 # Consulta para obtener tipos_elementos_del_usuario_id de todos los usuarios
 
 def generar_data():
+
+
     db_path = inciar_db()
     # Conectar a la base de datos SQLite
     conn = sqlite3.connect(db_path)
@@ -59,6 +63,8 @@ def generar_data():
 
     # Guardar el DataFrame unificado en el archivo Excel
     guardar_excel(save_path, df_unificado)
+
+
 
 def guardar_excel(save_path, df_unificado):
     try:
