@@ -12,7 +12,7 @@ def show_error(message):
 
 def kill_excel():
     """ Cierra todas las instancias de Excel abiertas. """
-    #os.system("taskkill /f /im excel.exe")
+    # os.system("taskkill /f /im excel.exe")
 
 def check_permissions(path):
     """ Verifica si el usuario tiene permisos de acceso al archivo o directorio. """
@@ -30,8 +30,8 @@ def copy_file(source, destination):
         shutil.copy2(source, destination)
         return True
     except Exception as e:
-        error_message = f"Error al copiar el archivo: {e}"
-        show_error(error_message)
+        print(f"Error al copiar el archivo: {e}")
+        show_error(f"Error al copiar el archivo: {e}")
         return False
 
 def main():
@@ -44,7 +44,7 @@ def main():
         dest_filename = f"Informe ESD ({datetime.now().strftime('%Y-%m-%d - %H-%M-%S')}).xlsx"
         dest_path = os.path.join(downloads_folder, dest_filename)
 
-        # Verificar permisos de acceso a las ubicaciones de red y locales
+        # Verificar permisos de acceso
         if not check_permissions(source_path) or not check_permissions(downloads_folder):
             return
 
@@ -70,11 +70,12 @@ def main():
                     for pivot_table in sheet.PivotTables():
                         pivot_table.RefreshTable()
                 except Exception as e:
-                    error_message = f"Error al actualizar tabla dinámica en hoja '{sheet.Name}': {e}"
-                    show_error(error_message)
+                    print(f"Error al actualizar tabla dinámica en hoja '{sheet.Name}': {e}")
         except Exception as e:
-            error_message = f"Error al actualizar consultas/tablas dinámicas: {e}"
-            show_error(error_message)
+            if "-2147418111" in str(e):  # Ignorar este error específico
+                print(f"[IGNORADO] Error al actualizar consultas/tablas dinámicas: {e}")
+            else:
+                show_error(f"Error al actualizar consultas/tablas dinámicas: {e}")
 
         # Ocultar todas las hojas excepto "Informe" y "Reporte de mediciones semestral"
         for sheet in workbook.Sheets:
@@ -98,4 +99,4 @@ def main():
                 excel.DisplayAlerts = True  # Restaurar alertas
                 excel.Quit()
             except Exception as e:
-                show_error(f"Error al cerrar Excel: {e}")
+                print(f"Error al cerrar Excel: {e}")
